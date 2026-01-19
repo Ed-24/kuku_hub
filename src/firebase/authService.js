@@ -10,6 +10,8 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebaseConfig';
 
+console.log('✅ [AUTH] authService.js loaded - auth:', !!auth, 'db:', !!db);
+
 // Sign Up with Email & Password
 export const signUp = async (email, password, displayName, userType) => {
   try {
