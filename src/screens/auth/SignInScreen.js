@@ -157,6 +157,13 @@ const SignInScreen = ({ navigation }) => {
                 <Text style={styles.signUpLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity 
+              style={styles.debugLink}
+              onPress={() => navigation.navigate('AuthDebug')}
+            >
+              <Text style={styles.debugLinkText}>🔧 Debug Auth Issues</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -268,6 +275,17 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: SIZES.md,
     fontWeight: 'bold',
+  },
+  debugLink: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginTop: 12,
+  },
+  debugLinkText: {
+    color: COLORS.gray,
+    fontSize: SIZES.sm,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
 

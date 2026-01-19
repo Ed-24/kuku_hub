@@ -13,11 +13,15 @@ import { auth, db } from './firebaseConfig';
 // Sign Up with Email & Password
 export const signUp = async (email, password, displayName, userType) => {
   try {
+    console.log('🔥 [AUTH] Starting sign up:', { email, displayName, userType });
+    
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log('✅ [AUTH] User created:', user.uid);
 
     // Update profile with display name
     await updateProfile(user, { displayName });
+    console.log('✅ [AUTH] Profile updated');
 
     // Create user document in Firestore
     await setDoc(doc(db, 'users', user.uid), {
@@ -37,9 +41,12 @@ export const signUp = async (email, password, displayName, userType) => {
       },
       isVerified: false,
     });
+    console.log('✅ [AUTH] Firestore user document created');
 
     return { success: true, user };
   } catch (error) {
+    console.error('❌ [AUTH] Sign up error:', error.code, error.message);
+    
     // Handle specific Firebase errors
     let message = error.message;
     
@@ -58,9 +65,15 @@ export const signUp = async (email, password, displayName, userType) => {
 // Sign In with Email & Password
 export const signIn = async (email, password) => {
   try {
+    console.log('🔥 [AUTH] Starting sign in:', { email });
+    
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log('✅ [AUTH] Sign in successful:', userCredential.user.uid);
+    
     return { success: true, user: userCredential.user };
   } catch (error) {
+    console.error('❌ [AUTH] Sign in error:', error.code, error.message);
+    
     // Handle specific Firebase errors
     let message = error.message;
     

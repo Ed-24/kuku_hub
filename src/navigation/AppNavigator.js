@@ -57,6 +57,9 @@ import TrackOrderScreen from '../screens/tracking/TrackOrderScreen';
 // Firebase Test Screen
 import FirebaseTestScreen from '../screens/FirebaseTestScreen';
 
+// Auth Debug Screen
+import AuthDebugScreen from '../screens/AuthDebugScreen';
+
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
@@ -262,6 +265,19 @@ const AppNavigator = () => {
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
             <Stack.Screen name="SignIn" component={SignInScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
+            
+            {/* Auth Debug - for troubleshooting */}
+            <Stack.Screen 
+              name="AuthDebug" 
+              component={AuthDebugScreen}
+              options={{ 
+                headerShown: true, 
+                title: 'Auth Debugger',
+                headerStyle: { backgroundColor: '#FF6B35' },
+                headerTintColor: '#fff',
+                headerTitleStyle: { fontWeight: 'bold' }
+              }} 
+            />
           </>
         )}
       </Stack.Navigator>

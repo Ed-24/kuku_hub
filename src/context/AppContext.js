@@ -17,12 +17,17 @@ export const AppProvider = ({ children }) => {
 
   // Listen to Firebase Auth State
   useEffect(() => {
+    console.log('🔥 [CONTEXT] Setting up auth listener');
     const unsubscribe = onAuthStateChangedListener(async (firebaseUser) => {
+      console.log('🔥 [CONTEXT] Auth state changed:', firebaseUser?.uid || 'No user');
+      
       if (firebaseUser) {
         setUser(firebaseUser);
         
         // Get user profile from Firestore
         const profileResult = await getUserProfile(firebaseUser.uid);
+        console.log('🔥 [CONTEXT] Profile fetch result:', profileResult.success);
+        
         if (profileResult.success) {
           setUserProfile(profileResult.data);
           setUserType(profileResult.data.userType || 'buyer');
@@ -42,6 +47,7 @@ export const AppProvider = ({ children }) => {
           }
         }
       } else {
+        console.log('🔥 [CONTEXT] User logged out');
         setUser(null);
         setUserProfile(null);
         setUserType('buyer');
