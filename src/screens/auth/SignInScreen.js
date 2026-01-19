@@ -36,15 +36,13 @@ const SignInScreen = ({ navigation }) => {
     const result = await signIn(email, password);
 
     if (result.success) {
-      login(result.user, userType);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'MainApp' }],
-      });
+      Alert.alert('Success', 'Logged in successfully!');
+      // AppContext will automatically update with the logged-in user
+      // No need to manually navigate - the navigator will handle it
     } else {
       Alert.alert('Sign In Failed', result.error);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (

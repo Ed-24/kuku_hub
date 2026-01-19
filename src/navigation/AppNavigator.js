@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -170,6 +170,26 @@ const styles = StyleSheet.create({
 });
 
 const AppNavigator = () => {
+  const { user, isLoading } = useApp();
+
+  if (isLoading) {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen 
+            name="Loading" 
+            component={() => (
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text>Loading...</Text>
+              </View>
+            )}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -177,51 +197,57 @@ const AppNavigator = () => {
           headerShown: false,
         }}
       >
-        {/* Auth Stack */}
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="SignIn" component={SignInScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
+        {user ? (
+          <>
+            {/* Main App with Bottom Tabs */}
+            <Stack.Screen name="MainApp" component={TabNavigator} />
 
-        {/* Main App with Bottom Tabs */}
-        <Stack.Screen name="MainApp" component={TabNavigator} />
+            {/* Order Flow */}
+            <Stack.Screen name="OrderChicks" component={OrderChicksScreen} />
+            <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+            <Stack.Screen name="Supplier" component={SupplierScreen} />
 
-        {/* Order Flow */}
-        <Stack.Screen name="OrderChicks" component={OrderChicksScreen} />
-        <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
-        <Stack.Screen name="Supplier" component={SupplierScreen} />
+            {/* Cart Flow */}
+            <Stack.Screen name="Cart" component={CartScreen} />
+            <Stack.Screen name="Checkout" component={CheckoutScreen} />
 
-        {/* Cart Flow */}
-        <Stack.Screen name="Cart" component={CartScreen} />
-        <Stack.Screen name="Checkout" component={CheckoutScreen} />
+            {/* Payment Flow */}
+            <Stack.Screen name="Address" component={AddressScreen} />
+            <Stack.Screen name="PaymentMethod" component={PaymentMethodScreen} />
 
-        {/* Payment Flow */}
-        <Stack.Screen name="Address" component={AddressScreen} />
-        <Stack.Screen name="PaymentMethod" component={PaymentMethodScreen} />
+            {/* Account Screens */}
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="MyOrders" component={MyOrdersScreen} />
+            <Stack.Screen name="ProfileEdit" component={ProfileEditScreen} />
+            <Stack.Screen name="Terms" component={TermsScreen} />
+            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
 
-        {/* Account Screens */}
-        <Stack.Screen name="Notifications" component={NotificationsScreen} />
-        <Stack.Screen name="MyOrders" component={MyOrdersScreen} />
-        <Stack.Screen name="ProfileEdit" component={ProfileEditScreen} />
-        <Stack.Screen name="Terms" component={TermsScreen} />
-        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+            {/* Services & Wallet */}
+            <Stack.Screen name="Services" component={ServicesScreen} />
+            <Stack.Screen name="Wallet" component={WalletScreen} />
 
-        {/* Services & Wallet */}
-        <Stack.Screen name="Services" component={ServicesScreen} />
-        <Stack.Screen name="Wallet" component={WalletScreen} />
+            {/* Farmer Screens */}
+            <Stack.Screen name="Inventory" component={InventoryScreen} />
+            <Stack.Screen name="Earnings" component={EarningsScreen} />
+            <Stack.Screen name="Analytics" component={AnalyticsScreen} />
 
-        {/* Farmer Screens */}
-        <Stack.Screen name="Inventory" component={InventoryScreen} />
-        <Stack.Screen name="Earnings" component={EarningsScreen} />
-        <Stack.Screen name="Analytics" component={AnalyticsScreen} />
+            {/* Messages */}
+            <Stack.Screen name="Messages" component={MessagesScreen} />
 
-        {/* Messages */}
-        <Stack.Screen name="Messages" component={MessagesScreen} />
+            {/* Tracking */}
+            <Stack.Screen name="TrackOrder" component={TrackOrderScreen} />
 
-        {/* Tracking */}
-        <Stack.Screen name="TrackOrder" component={TrackOrderScreen} />
-
-        {/* Firebase Test */}
-        <Stack.Screen name="FirebaseTest" component={FirebaseTestScreen} options={{ headerShown: true, title: 'Firebase Test' }} />
+            {/* Firebase Test */}
+            <Stack.Screen name="FirebaseTest" component={FirebaseTestScreen} options={{ headerShown: true, title: 'Firebase Test' }} />
+          </>
+        ) : (
+          <>
+            {/* Auth Stack */}
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

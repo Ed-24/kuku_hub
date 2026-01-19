@@ -65,15 +65,12 @@ const SignUpScreen = ({ navigation }) => {
     
     if (result.success) {
       Alert.alert('Success', 'Account created successfully!');
-      login(result.user, userType);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'MainApp' }],
-      });
+      // AppContext will automatically update with the new user
+      // No need to manually navigate - the navigator will handle it
     } else {
       Alert.alert('Sign Up Failed', result.error);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
