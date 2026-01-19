@@ -140,19 +140,6 @@ export const signIn = async (email, password) => {
     return { success: false, error: message };
   }
 };
-    } else if (error.code === 'auth/invalid-email') {
-      message = 'Invalid email address';
-    } else if (error.code === 'auth/user-disabled') {
-      message = 'This account has been disabled';
-    } else if (error.code === 'auth/too-many-requests') {
-      message = 'Too many login attempts. Please try again later';
-    } else if (error.code === 'auth/configuration-not-found') {
-      message = 'Firebase Auth not configured. Please check project settings.';
-    }
-    
-    return { success: false, error: message };
-  }
-};
 
 // Sign Out
 export const logout = async () => {
