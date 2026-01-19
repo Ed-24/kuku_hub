@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { auth, db, storage } from '../../firebase/firebaseConfig';
+import { auth, db, storage } from '../firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
 
