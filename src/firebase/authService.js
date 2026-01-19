@@ -14,6 +14,7 @@ console.log('✅ [AUTH] authService.js module loaded');
 
 // Sign Up with Email & Password
 export const signUp = async (email, password, displayName, userType) => {
+  let newUser = null;
   try {
     console.log('🔥 [AUTH] Starting sign up:', { email, displayName, userType });
     
@@ -22,17 +23,17 @@ export const signUp = async (email, password, displayName, userType) => {
     
     console.log('✅ [AUTH] Services obtained, creating user...');
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    console.log('✅ [AUTH] User created with UID:', user.uid);
+    newUser = userCredential.user;
+    console.log('✅ [AUTH] User created with UID:', newUser.uid);
 
     // Update profile with display name
-    await updateProfile(user, { displayName });
+    await updateProfile(newUser, { displayName });
     console.log('✅ [AUTH] Firebase profile updated with displayName:', displayName);
 
     // Create user document in Firestore
     const userDocData = {
-      uid: user.uid,
-      email: user.email,
+      uid: newUser.uid,
+      email: newUser.email,
       displayName: displayName,
       userType: userType, // 'buyer' or 'farmer'
       createdAt: new Date().toISOString(),
@@ -48,14 +49,36 @@ export const signUp = async (email, password, displayName, userType) => {
       isVerified: false,
     };
     
-    console.log('🔥 [AUTH] Saving user document to Firestore:', userDocData);
-    await setDoc(doc(db, 'users', user.uid), userDocData);
-    console.log('✅ [AUTH] Firestore user document created successfully at path: users/' + user.uid);
+    console.log('🔥 [AUTH] About to save user document to Firestore at path: users/' + newUser.uid);
+    console.log('🔥 [AUTH] Document data:', JSON.stringify(userDocData, null, 2));
+    
+    try {
+      await setDoc(doc(db, 'users', newUser.uid), userDocData);
+      console.log('✅ [AUTH] Firestore user document created successfully');
+    } catch (firestoreError) {
+      console.error('❌ [AUTH] Firestore setDoc failed:', firestoreError.code, firestoreError.message);
+      console.error('❌ [AUTH] Full Firestore error:', firestoreError);
+      throw firestoreError;
+    }
 
-    return { success: true, user };
+    // Verify document was created
+    console.log('🔥 [AUTH] Verifying document was saved...');
+    try {
+      const verifyDoc = await getDoc(doc(db, 'users', newUser.uid));
+      if (verifyDoc.exists()) {
+        console.log('✅ [AUTH] Verification successful - document exists:', verifyDoc.data());
+      } else {
+        console.error('❌ [AUTH] Verification failed - document does not exist after setDoc!');
+      }
+    } catch (verifyError) {
+      console.error('❌ [AUTH] Verification read failed:', verifyError.message);
+    }
+
+    return { success: true, user: newUser, userProfile: userDocData };
   } catch (error) {
     console.error('❌ [AUTH] Sign up error:', error.code, error.message);
     console.error('❌ [AUTH] Full error:', error);
+    console.error('❌ [AUTH] Error stack:', error.stack);
     
     // Handle specific Firebase errors
     let message = error.message;
@@ -66,10 +89,10 @@ export const signUp = async (email, password, displayName, userType) => {
       message = 'Password should be at least 6 characters';
     } else if (error.code === 'auth/invalid-email') {
       message = 'Please enter a valid email address';
-    } else if (error.code === 'permission-denied') {
-      message = 'Firestore permission denied. Check security rules.';
-    } else if (error.code === 'PERMISSION_DENIED') {
-      message = 'Firestore permission denied. Check security rules.';
+    } else if (error.code === 'permission-denied' || error.code === 'PERMISSION_DENIED') {
+      message = 'Firestore permission denied. Check security rules. Ensure collection "users" exists and rules allow authenticated write.';
+    } else if (error.message && error.message.includes('permission')) {
+      message = 'Permission denied: ' + error.message;
     }
     
     return { success: false, error: message };

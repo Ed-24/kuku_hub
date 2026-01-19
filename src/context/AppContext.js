@@ -23,28 +23,48 @@ export const AppProvider = ({ children }) => {
       
       if (firebaseUser) {
         setUser(firebaseUser);
+        console.log('🔥 [CONTEXT] User set, attempting to fetch profile');
         
         // Get user profile from Firestore
-        const profileResult = await getUserProfile(firebaseUser.uid);
-        console.log('🔥 [CONTEXT] Profile fetch result:', profileResult.success);
-        
-        if (profileResult.success) {
-          setUserProfile(profileResult.data);
-          setUserType(profileResult.data.userType || 'buyer');
+        try {
+          const profileResult = await getUserProfile(firebaseUser.uid);
+          console.log('🔥 [CONTEXT] Profile fetch result:', profileResult.success, profileResult.error);
+          
+          if (profileResult.success && profileResult.data) {
+            console.log('✅ [CONTEXT] Profile found and set:', profileResult.data.displayName);
+            setUserProfile(profileResult.data);
+            setUserType(profileResult.data.userType || 'buyer');
 
-          // Load cart for buyers
-          if (profileResult.data.userType === 'buyer') {
-            const cartResult = await getCart(firebaseUser.uid);
-            if (cartResult.success && cartResult.data.items) {
-              setCart(cartResult.data.items);
+            // Load cart for buyers
+            if (profileResult.data.userType === 'buyer') {
+              try {
+                const cartResult = await getCart(firebaseUser.uid);
+                if (cartResult.success && cartResult.data.items) {
+                  setCart(cartResult.data.items);
+                  console.log('✅ [CONTEXT] Cart loaded with', cartResult.data.items.length, 'items');
+                }
+              } catch (cartError) {
+                console.error('❌ [CONTEXT] Cart load error:', cartError);
+              }
             }
-          }
 
-          // Load orders
-          const ordersResult = await getOrdersByBuyer(firebaseUser.uid);
-          if (ordersResult.success) {
-            setOrders(ordersResult.data);
+            // Load orders
+            try {
+              const ordersResult = await getOrdersByBuyer(firebaseUser.uid);
+              if (ordersResult.success) {
+                setOrders(ordersResult.data);
+                console.log('✅ [CONTEXT] Orders loaded:', ordersResult.data.length);
+              }
+            } catch (ordersError) {
+              console.error('❌ [CONTEXT] Orders load error:', ordersError);
+            }
+          } else {
+            console.warn('⚠️ [CONTEXT] Profile not found, user may be new or profile not saved');
+            setUserProfile(null);
+            setUserType('buyer');
           }
+        } catch (error) {
+          console.error('❌ [CONTEXT] Error in auth state handler:', error);
         }
       } else {
         console.log('🔥 [CONTEXT] User logged out');
