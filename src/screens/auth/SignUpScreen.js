@@ -10,10 +10,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
+import { signUp } from '../../firebase/authService';
 
 const SignUpScreen = ({ navigation }) => {
   const { login } = useApp();
@@ -24,14 +27,53 @@ const SignUpScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState('buyer');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignUp = () => {
-    // Simulate registration
-    login({ email, name }, userType);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'MainApp' }],
-    });
+  const validateForm = () => {
+    if (!name.trim()) {
+      Alert.alert('Error', 'Please enter your full name');
+      return false;
+    }
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email');
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Alert.alert('Error', 'Please enter a valid email');
+      return false;
+    }
+    if (!password) {
+      Alert.alert('Error', 'Please enter a password');
+      return false;
+    }
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSignUp = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    const result = await signUp(email, password, name, userType);
+    
+    if (result.success) {
+      Alert.alert('Success', 'Account created successfully!');
+      login(result.user, userType);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'MainApp' }],
+      });
+    } else {
+      Alert.alert('Sign Up Failed', result.error);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -174,8 +216,16 @@ const SignUpScreen = ({ navigation }) => {
               />
             </View>
 
-            <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-              <Text style={styles.signUpButtonText}>Create Account</Text>
+            <TouchableOpacity 
+              style={[styles.signUpButton, isLoading && styles.signUpButtonDisabled]} 
+              onPress={handleSignUp}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={COLORS.white} size="small" />
+              ) : (
+                <Text style={styles.signUpButtonText}>Create Account</Text>
+              )}
             </TouchableOpacity>
 
             <View style={styles.signInContainer}>
@@ -267,6 +317,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 24,
+  },
+  signUpButtonDisabled: {
+    opacity: 0.6,
   },
   signUpButtonText: {
     color: COLORS.white,

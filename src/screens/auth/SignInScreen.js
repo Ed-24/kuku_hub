@@ -10,10 +10,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
+import { signIn } from '../../firebase/authService';
 
 const SignInScreen = ({ navigation }) => {
   const { login } = useApp();
@@ -21,14 +24,27 @@ const SignInScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState('buyer');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = () => {
-    // Simulate login
-    login({ email, name: email.split('@')[0] }, userType);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'MainApp' }],
-    });
+  const handleSignIn = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+
+    setIsLoading(true);
+    const result = await signIn(email, password);
+
+    if (result.success) {
+      login(result.user, userType);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'MainApp' }],
+      });
+    } else {
+      Alert.alert('Sign In Failed', result.error);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -125,8 +141,16 @@ const SignInScreen = ({ navigation }) => {
               <Text style={styles.forgotPasswordText}>Forgot password?</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
-              <Text style={styles.signInButtonText}>Sign In</Text>
+            <TouchableOpacity 
+              style={[styles.signInButton, isLoading && styles.signInButtonDisabled]} 
+              onPress={handleSignIn}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={COLORS.white} size="small" />
+              ) : (
+                <Text style={styles.signInButtonText}>Sign In</Text>
+              )}
             </TouchableOpacity>
 
             <View style={styles.signUpContainer}>
@@ -225,6 +249,9 @@ const styles = StyleSheet.create({
     borderRadius: SIZES.borderRadius,
     alignItems: 'center',
     marginBottom: 24,
+  },
+  signInButtonDisabled: {
+    opacity: 0.6,
   },
   signInButtonText: {
     color: COLORS.white,

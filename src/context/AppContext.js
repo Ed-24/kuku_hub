@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { onAuthStateChangedListener, getUserProfile, logout as firebaseLogout } from '../firebase/authService';
+import { getCart, getOrdersByBuyer } from '../firebase/dataService';
 
 const AppContext = createContext();
 
@@ -6,38 +8,86 @@ export const useApp = () => useContext(AppContext);
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [userType, setUserType] = useState('buyer'); // 'buyer' or 'farmer'
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Listen to Firebase Auth State
+  useEffect(() => {
+    const unsubscribe = onAuthStateChangedListener(async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        
+        // Get user profile from Firestore
+        const profileResult = await getUserProfile(firebaseUser.uid);
+        if (profileResult.success) {
+          setUserProfile(profileResult.data);
+          setUserType(profileResult.data.userType || 'buyer');
+
+          // Load cart for buyers
+          if (profileResult.data.userType === 'buyer') {
+            const cartResult = await getCart(firebaseUser.uid);
+            if (cartResult.success && cartResult.data.items) {
+              setCart(cartResult.data.items);
+            }
+          }
+
+          // Load orders
+          const ordersResult = await getOrdersByBuyer(firebaseUser.uid);
+          if (ordersResult.success) {
+            setOrders(ordersResult.data);
+          }
+        }
+      } else {
+        setUser(null);
+        setUserProfile(null);
+        setUserType('buyer');
+        setCart([]);
+        setOrders([]);
+      }
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
 
   const login = (userData, type = 'buyer') => {
     setUser(userData);
     setUserType(type);
   };
 
-  const logout = () => {
-    setUser(null);
-    setUserType('buyer');
-    setCart([]);
+  const logout = async () => {
+    const result = await firebaseLogout();
+    if (result.success) {
+      setUser(null);
+      setUserProfile(null);
+      setUserType('buyer');
+      setCart([]);
+      setOrders([]);
+      return { success: true };
+    }
+    return result;
   };
 
   const addToCart = (product, quantity = 1) => {
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+      const existing = prev.find((item) => item.productId === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id
+          item.productId === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { ...product, quantity }];
+      return [...prev, { productId: product.id, ...product, quantity }];
     });
   };
 
   const removeFromCart = (productId) => {
-    setCart((prev) => prev.filter((item) => item.id !== productId));
+    setCart((prev) => prev.filter((item) => item.productId !== productId));
   };
 
   const updateCartQuantity = (productId, quantity) => {
@@ -47,7 +97,7 @@ export const AppProvider = ({ children }) => {
     }
     setCart((prev) =>
       prev.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
+        item.productId === productId ? { ...item, quantity } : item
       )
     );
   };
@@ -57,7 +107,7 @@ export const AppProvider = ({ children }) => {
   };
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cart.reduce((total, item) => total + (item.price || 0) * item.quantity, 0);
   };
 
   const getCartCount = () => {
@@ -98,10 +148,12 @@ export const AppProvider = ({ children }) => {
 
   const value = {
     user,
+    userProfile,
     userType,
     cart,
     orders,
     notifications,
+    isLoading,
     login,
     logout,
     addToCart,

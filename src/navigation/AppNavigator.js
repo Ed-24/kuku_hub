@@ -54,6 +54,9 @@ import MessagesScreen from '../screens/messages/MessagesScreen';
 // Tracking Screen
 import TrackOrderScreen from '../screens/tracking/TrackOrderScreen';
 
+// Firebase Test Screen
+import FirebaseTestScreen from '../screens/FirebaseTestScreen';
+
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
@@ -216,6 +219,9 @@ const AppNavigator = () => {
 
         {/* Tracking */}
         <Stack.Screen name="TrackOrder" component={TrackOrderScreen} />
+
+        {/* Firebase Test */}
+        <Stack.Screen name="FirebaseTest" component={FirebaseTestScreen} options={{ headerShown: true, title: 'Firebase Test' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
