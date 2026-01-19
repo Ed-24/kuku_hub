@@ -60,6 +60,14 @@ import FirebaseTestScreen from '../screens/FirebaseTestScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
+// Loading Screen Component
+const LoadingScreen = () => (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator size="large" color={COLORS.primary} />
+    <Text style={styles.loadingText}>Loading...</Text>
+  </View>
+);
+
 const DashboardWrapper = () => {
   const { userType } = useApp();
   return userType === 'farmer' ? <FarmerDashboard /> : <BuyerDashboard />;
@@ -167,6 +175,18 @@ const styles = StyleSheet.create({
     top: -2,
     right: -6,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
 });
 
 const AppNavigator = () => {
@@ -177,12 +197,8 @@ const AppNavigator = () => {
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen 
-            name="Loading" 
-            component={() => (
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text>Loading...</Text>
-              </View>
-            )}
+            name="Loading"
+            component={LoadingScreen}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>
