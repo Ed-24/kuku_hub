@@ -12,11 +12,12 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
-import { signUp } from '../../firebase/authService';
+import { signUp, testFirebaseConnection } from '../../firebase/authService';
 
 const SignUpScreen = ({ navigation }) => {
   const { login } = useApp();
@@ -28,6 +29,8 @@ const SignUpScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState('buyer');
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successData, setSuccessData] = useState(null);
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -61,16 +64,53 @@ const SignUpScreen = ({ navigation }) => {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    console.log('🔥 [SIGNUP] Starting signup process for:', email);
+    
     const result = await signUp(email, password, name, userType);
     
     if (result.success) {
-      Alert.alert('Success', 'Account created successfully!');
-      // AppContext will automatically update with the new user
-      // No need to manually navigate - the navigator will handle it
+      console.log('✅ [SIGNUP] Account created successfully!');
+      
+      // Test Firebase connection
+      console.log('🔥 [SIGNUP] Testing Firebase connectivity...');
+      const connTest = await testFirebaseConnection();
+      console.log('✅ [SIGNUP] Connection test result:', connTest);
+      
+      // Show success modal
+      setSuccessData({
+        name,
+        email,
+        userType,
+        connTest,
+      });
+      setShowSuccessModal(true);
+      setIsLoading(false);
     } else {
+      console.error('❌ [SIGNUP] Account creation failed:', result.error);
       Alert.alert('Sign Up Failed', result.error);
       setIsLoading(false);
     }
+  };
+
+  const handleProceedToApp = () => {
+    setShowSuccessModal(false);
+    // The AppContext will handle navigation automatically
+    // since the user is now authenticated
+  };
+
+  const handleGoToSignIn = () => {
+    setShowSuccessModal(false);
+    // Reset form
+    setName('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setShowPassword(false);
+    // Navigate to SignIn screen
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'SignIn' }],
+    });
   };
 
   return (
