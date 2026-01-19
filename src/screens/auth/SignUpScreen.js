@@ -274,6 +274,86 @@ const SignUpScreen = ({ navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Success Modal */}
+      <Modal
+        visible={showSuccessModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowSuccessModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.successIconContainer}>
+              <Ionicons name="checkmark-circle" size={80} color={COLORS.primary} />
+            </View>
+
+            <Text style={styles.successTitle}>Account Created Successfully! 🎉</Text>
+
+            <View style={styles.successInfoContainer}>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Name:</Text>
+                <Text style={styles.infoValue}>{successData?.name}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Email:</Text>
+                <Text style={styles.infoValue}>{successData?.email}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Account Type:</Text>
+                <Text style={styles.infoValue}>
+                  {successData?.userType.charAt(0).toUpperCase() + successData?.userType.slice(1)}
+                </Text>
+              </View>
+            </View>
+
+            {successData?.connTest && (
+              <View style={styles.connectionStatus}>
+                <Text style={styles.connectionTitle}>Firebase Status:</Text>
+                {successData.connTest.success ? (
+                  <>
+                    <Text style={styles.connectionSuccess}>✅ {successData.connTest.message}</Text>
+                    <View style={styles.connectionDetails}>
+                      {successData.connTest.fullReport.map((report, idx) => (
+                        <Text key={idx} style={styles.detailText}>{report}</Text>
+                      ))}
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.connectionError}>⚠️ {successData.connTest.message}</Text>
+                    <View style={styles.connectionDetails}>
+                      {successData.connTest.fullReport.map((report, idx) => (
+                        <Text key={idx} style={styles.detailText}>{report}</Text>
+                      ))}
+                    </View>
+                  </>
+                )}
+              </View>
+            )}
+
+            <Text style={styles.successMessage}>
+              Your account is now ready. You can proceed to the app or sign in again.
+            </Text>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.proceedButton}
+                onPress={handleProceedToApp}
+              >
+                <Text style={styles.proceedButtonText}>Proceed to App</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.signinButton}
+                onPress={handleGoToSignIn}
+              >
+                <Text style={styles.signinButtonText}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -373,6 +453,127 @@ const styles = StyleSheet.create({
     fontSize: SIZES.md,
   },
   signInLink: {
+    color: COLORS.primary,
+    fontSize: SIZES.md,
+    fontWeight: 'bold',
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.borderRadius * 2,
+    padding: 30,
+    alignItems: 'center',
+    maxHeight: '90%',
+    width: '100%',
+  },
+  successIconContainer: {
+    marginBottom: 20,
+  },
+  successTitle: {
+    fontSize: SIZES.xl,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  successInfoContainer: {
+    backgroundColor: COLORS.lightGray,
+    borderRadius: SIZES.borderRadius,
+    padding: 15,
+    marginBottom: 20,
+    width: '100%',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  infoLabel: {
+    fontWeight: 'bold',
+    color: COLORS.darkGray,
+    fontSize: SIZES.md,
+  },
+  infoValue: {
+    color: COLORS.primary,
+    fontSize: SIZES.md,
+    fontWeight: '600',
+  },
+  connectionStatus: {
+    backgroundColor: '#f0f8ff',
+    borderRadius: SIZES.borderRadius,
+    padding: 12,
+    marginBottom: 15,
+    width: '100%',
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
+  },
+  connectionTitle: {
+    fontWeight: 'bold',
+    color: COLORS.darkGray,
+    marginBottom: 8,
+    fontSize: SIZES.sm,
+  },
+  connectionSuccess: {
+    color: '#28a745',
+    fontSize: SIZES.sm,
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  connectionError: {
+    color: '#dc3545',
+    fontSize: SIZES.sm,
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  connectionDetails: {
+    marginTop: 8,
+  },
+  detailText: {
+    fontSize: SIZES.xs,
+    color: COLORS.darkGray,
+    marginBottom: 4,
+    paddingLeft: 8,
+  },
+  successMessage: {
+    fontSize: SIZES.md,
+    color: COLORS.gray,
+    textAlign: 'center',
+    marginBottom: 25,
+    lineHeight: 22,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 12,
+  },
+  proceedButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: SIZES.borderRadius,
+    alignItems: 'center',
+  },
+  proceedButtonText: {
+    color: COLORS.white,
+    fontSize: SIZES.md,
+    fontWeight: 'bold',
+  },
+  signinButton: {
+    backgroundColor: COLORS.white,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: SIZES.borderRadius,
+    alignItems: 'center',
+  },
+  signinButtonText: {
     color: COLORS.primary,
     fontSize: SIZES.md,
     fontWeight: 'bold',
