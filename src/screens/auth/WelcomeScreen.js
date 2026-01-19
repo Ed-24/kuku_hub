@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,33 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../../constants/theme';
+import { testFirebaseConnection } from '../../firebase/authService';
 
 const WelcomeScreen = ({ navigation }) => {
+  const [isTesting, setIsTesting] = useState(false);
+
+  const handleTestConnection = async () => {
+    setIsTesting(true);
+    try {
+      console.log('🔥 [WELCOME] Running Firebase connectivity test...');
+      const result = await testFirebaseConnection();
+      console.log('✅ [WELCOME] Test result:', result);
+      
+      let message = result.message + '\n\n';
+      message += result.fullReport.join('\n');
+      
+      Alert.alert('Firebase Connection Test', message);
+    } catch (error) {
+      Alert.alert('Test Error', 'Failed to run connection test: ' + error.message);
+    } finally {
+      setIsTesting(false);
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
@@ -39,6 +62,21 @@ const WelcomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('SignIn')}
         >
           <Text style={styles.getStartedText}>Get Started</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.testButton}
+          onPress={handleTestConnection}
+          disabled={isTesting}
+        >
+          {isTesting ? (
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          ) : (
+            <>
+              <Ionicons name="checkmark-circle" size={18} color={COLORS.primary} style={{ marginRight: 8 }} />
+              <Text style={styles.testButtonText}>Test Connection</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -103,6 +141,22 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: SIZES.lg,
     fontWeight: 'bold',
+  },
+  testButton: {
+    marginTop: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: SIZES.borderRadius,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  testButtonText: {
+    color: COLORS.primary,
+    fontSize: SIZES.md,
+    fontWeight: '600',
   },
 });
 
