@@ -12,12 +12,14 @@ import {
   deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { getDBService } from './firebaseConfig';
+
+const getDb = () => getDBService();
 
 // ============ PRODUCTS ============
 export const addProduct = async (farmerId, productData) => {
   try {
-    const productRef = doc(collection(db, 'products'));
+    const productRef = doc(collection(getDb(), 'products'));
     await setDoc(productRef, {
       ...productData,
       farmerId,
@@ -32,7 +34,7 @@ export const addProduct = async (farmerId, productData) => {
 
 export const getProducts = async () => {
   try {
-    const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+    const q = query(collection(getDb(), 'products'), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     const products = [];
     querySnapshot.forEach((doc) => {
@@ -47,7 +49,7 @@ export const getProducts = async () => {
 export const getProductsByFarmer = async (farmerId) => {
   try {
     const q = query(
-      collection(db, 'products'),
+      collection(getDb(), 'products'),
       where('farmerId', '==', farmerId),
       orderBy('createdAt', 'desc')
     );
@@ -64,7 +66,7 @@ export const getProductsByFarmer = async (farmerId) => {
 
 export const getProduct = async (productId) => {
   try {
-    const docSnap = await getDoc(doc(db, 'products', productId));
+    const docSnap = await getDoc(doc(getDb(), 'products', productId));
     if (docSnap.exists()) {
       return { success: true, data: { id: docSnap.id, ...docSnap.data() } };
     }
@@ -76,7 +78,7 @@ export const getProduct = async (productId) => {
 
 export const updateProduct = async (productId, updateData) => {
   try {
-    await updateDoc(doc(db, 'products', productId), {
+    await updateDoc(doc(getDb(), 'products', productId), {
       ...updateData,
       updatedAt: serverTimestamp(),
     });
@@ -88,7 +90,7 @@ export const updateProduct = async (productId, updateData) => {
 
 export const deleteProduct = async (productId) => {
   try {
-    await deleteDoc(doc(db, 'products', productId));
+    await deleteDoc(doc(getDb(), 'products', productId));
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -98,7 +100,7 @@ export const deleteProduct = async (productId) => {
 // ============ ORDERS ============
 export const createOrder = async (buyerId, orderData) => {
   try {
-    const orderRef = doc(collection(db, 'orders'));
+    const orderRef = doc(collection(getDb(), 'orders'));
     await setDoc(orderRef, {
       ...orderData,
       buyerId,
@@ -116,7 +118,7 @@ export const createOrder = async (buyerId, orderData) => {
 export const getOrdersByBuyer = async (buyerId) => {
   try {
     const q = query(
-      collection(db, 'orders'),
+      collection(getDb(), 'orders'),
       where('buyerId', '==', buyerId),
       orderBy('createdAt', 'desc')
     );
@@ -134,7 +136,7 @@ export const getOrdersByBuyer = async (buyerId) => {
 export const getOrdersByFarmer = async (farmerId) => {
   try {
     const q = query(
-      collection(db, 'orders'),
+      collection(getDb(), 'orders'),
       where('farmerId', '==', farmerId),
       orderBy('createdAt', 'desc')
     );
@@ -151,7 +153,7 @@ export const getOrdersByFarmer = async (farmerId) => {
 
 export const updateOrderStatus = async (orderId, status) => {
   try {
-    await updateDoc(doc(db, 'orders', orderId), {
+    await updateDoc(doc(getDb(), 'orders', orderId), {
       status,
       updatedAt: serverTimestamp(),
     });
@@ -164,7 +166,7 @@ export const updateOrderStatus = async (orderId, status) => {
 // ============ CART ============
 export const addToCart = async (buyerId, productId, quantity) => {
   try {
-    const cartRef = doc(db, 'carts', buyerId);
+    const cartRef = doc(getDb(), 'carts', buyerId);
     const cartSnap = await getDoc(cartRef);
 
     if (cartSnap.exists()) {
@@ -199,7 +201,7 @@ export const addToCart = async (buyerId, productId, quantity) => {
 
 export const getCart = async (buyerId) => {
   try {
-    const docSnap = await getDoc(doc(db, 'carts', buyerId));
+    const docSnap = await getDoc(doc(getDb(), 'carts', buyerId));
     if (docSnap.exists()) {
       return { success: true, data: docSnap.data() };
     }
@@ -211,7 +213,7 @@ export const getCart = async (buyerId) => {
 
 export const removeFromCart = async (buyerId, productId) => {
   try {
-    const cartRef = doc(db, 'carts', buyerId);
+    const cartRef = doc(getDb(), 'carts', buyerId);
     const cartSnap = await getDoc(cartRef);
 
     if (cartSnap.exists()) {
@@ -227,7 +229,7 @@ export const removeFromCart = async (buyerId, productId) => {
 
 export const clearCart = async (buyerId) => {
   try {
-    await updateDoc(doc(db, 'carts', buyerId), {
+    await updateDoc(doc(getDb(), 'carts', buyerId), {
       items: [],
       updatedAt: serverTimestamp(),
     });
@@ -240,7 +242,7 @@ export const clearCart = async (buyerId) => {
 // ============ MESSAGES ============
 export const sendMessage = async (senderId, receiverId, messageData) => {
   try {
-    const messageRef = doc(collection(db, 'messages'));
+    const messageRef = doc(collection(getDb(), 'messages'));
     await setDoc(messageRef, {
       ...messageData,
       senderId,
@@ -257,7 +259,7 @@ export const sendMessage = async (senderId, receiverId, messageData) => {
 export const getConversation = async (userId1, userId2) => {
   try {
     const q = query(
-      collection(db, 'messages'),
+      collection(getDb(), 'messages'),
       where('senderId', '==', userId1),
       where('receiverId', '==', userId2),
       orderBy('createdAt', 'asc')
@@ -276,7 +278,7 @@ export const getConversation = async (userId1, userId2) => {
 // ============ USER PROFILE ============
 export const updateUserProfile = async (uid, profileData) => {
   try {
-    await updateDoc(doc(db, 'users', uid), {
+    await updateDoc(doc(getDb(), 'users', uid), {
       ...profileData,
       updatedAt: serverTimestamp(),
     });
@@ -289,7 +291,7 @@ export const updateUserProfile = async (uid, profileData) => {
 // ============ REVIEWS ============
 export const addReview = async (productId, buyerId, reviewData) => {
   try {
-    const reviewRef = doc(collection(db, 'reviews'));
+    const reviewRef = doc(collection(getDb(), 'reviews'));
     await setDoc(reviewRef, {
       ...reviewData,
       productId,
@@ -305,7 +307,7 @@ export const addReview = async (productId, buyerId, reviewData) => {
 export const getProductReviews = async (productId) => {
   try {
     const q = query(
-      collection(db, 'reviews'),
+      collection(getDb(), 'reviews'),
       where('productId', '==', productId),
       orderBy('createdAt', 'desc')
     );

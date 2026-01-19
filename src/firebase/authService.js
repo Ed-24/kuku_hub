@@ -8,31 +8,35 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebaseConfig';
+import { getAuthService, getDBService } from './firebaseConfig';
 
-console.log('✅ [AUTH] authService.js loaded - auth:', !!auth, 'db:', !!db);
+console.log('✅ [AUTH] authService.js module loaded');
 
 // Sign Up with Email & Password
 export const signUp = async (email, password, displayName, userType) => {
   try {
     console.log('🔥 [AUTH] Starting sign up:', { email, displayName, userType });
     
+    const auth = getAuthService();
+    const db = getDBService();
+    
+    console.log('✅ [AUTH] Services obtained, creating user...');
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    console.log('✅ [AUTH] User created:', user.uid);
+    console.log('✅ [AUTH] User created with UID:', user.uid);
 
     // Update profile with display name
     await updateProfile(user, { displayName });
-    console.log('✅ [AUTH] Profile updated');
+    console.log('✅ [AUTH] Firebase profile updated with displayName:', displayName);
 
     // Create user document in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
+    const userDocData = {
       uid: user.uid,
       email: user.email,
       displayName: displayName,
       userType: userType, // 'buyer' or 'farmer'
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       profile: {
         phone: '',
         address: '',
@@ -42,12 +46,16 @@ export const signUp = async (email, password, displayName, userType) => {
         bio: '',
       },
       isVerified: false,
-    });
-    console.log('✅ [AUTH] Firestore user document created');
+    };
+    
+    console.log('🔥 [AUTH] Saving user document to Firestore:', userDocData);
+    await setDoc(doc(db, 'users', user.uid), userDocData);
+    console.log('✅ [AUTH] Firestore user document created successfully at path: users/' + user.uid);
 
     return { success: true, user };
   } catch (error) {
     console.error('❌ [AUTH] Sign up error:', error.code, error.message);
+    console.error('❌ [AUTH] Full error:', error);
     
     // Handle specific Firebase errors
     let message = error.message;
@@ -58,6 +66,10 @@ export const signUp = async (email, password, displayName, userType) => {
       message = 'Password should be at least 6 characters';
     } else if (error.code === 'auth/invalid-email') {
       message = 'Please enter a valid email address';
+    } else if (error.code === 'permission-denied') {
+      message = 'Firestore permission denied. Check security rules.';
+    } else if (error.code === 'PERMISSION_DENIED') {
+      message = 'Firestore permission denied. Check security rules.';
     }
     
     return { success: false, error: message };
@@ -69,12 +81,9 @@ export const signIn = async (email, password) => {
   try {
     console.log('🔥 [AUTH] Starting sign in:', { email });
     
-    // Validate auth is initialized
-    if (!auth) {
-      throw new Error('Firebase Auth not initialized. Check console for initialization errors.');
-    }
+    const auth = getAuthService();
+    console.log('✅ [AUTH] Auth service obtained, attempting login...');
     
-    console.log('🔥 [AUTH] Auth object available, attempting login...');
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     console.log('✅ [AUTH] Sign in successful:', userCredential.user.uid);
     
@@ -106,6 +115,7 @@ export const signIn = async (email, password) => {
 // Sign Out
 export const logout = async () => {
   try {
+    const auth = getAuthService();
     await signOut(auth);
     return { success: true };
   } catch (error) {
@@ -116,6 +126,7 @@ export const logout = async () => {
 // Send Password Reset Email
 export const resetPassword = async (email) => {
   try {
+    const auth = getAuthService();
     await sendPasswordResetEmail(auth, email);
     return { success: true };
   } catch (error) {
@@ -126,11 +137,10 @@ export const resetPassword = async (email) => {
 // Update Password
 export const changePassword = async (currentPassword, newPassword) => {
   try {
+    const auth = getAuthService();
     const user = auth.currentUser;
     if (!user) throw new Error('No user logged in');
 
-    // For security, you'd typically re-authenticate the user first
-    // This is a simplified version
     await updatePassword(user, newPassword);
     return { success: true };
   } catch (error) {
@@ -140,24 +150,40 @@ export const changePassword = async (currentPassword, newPassword) => {
 
 // Get Current User
 export const getCurrentUser = () => {
-  return auth.currentUser;
+  try {
+    const auth = getAuthService();
+    return auth.currentUser;
+  } catch (error) {
+    return null;
+  }
 };
 
 // Listen to Auth State Changes
 export const onAuthStateChangedListener = (callback) => {
-  return onAuthStateChanged(auth, callback);
+  try {
+    const auth = getAuthService();
+    return onAuthStateChanged(auth, callback);
+  } catch (error) {
+    console.error('❌ [AUTH] Auth listener error:', error);
+    return () => {};
+  }
 };
 
 // Get User Profile from Firestore
 export const getUserProfile = async (uid) => {
   try {
+    console.log('🔥 [AUTH] Fetching user profile for:', uid);
+    const db = getDBService();
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
+      console.log('✅ [AUTH] User profile found:', userDoc.data());
       return { success: true, data: userDoc.data() };
     } else {
+      console.warn('⚠️ [AUTH] User profile not found in Firestore for UID:', uid);
       return { success: false, error: 'User profile not found' };
     }
   } catch (error) {
+    console.error('❌ [AUTH] Error fetching user profile:', error.code, error.message);
     return { success: false, error: error.message };
   }
 };

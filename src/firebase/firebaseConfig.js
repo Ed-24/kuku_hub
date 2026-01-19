@@ -14,29 +14,60 @@ const firebaseConfig = {
   appId: "1:898175860520:web:3b72d606be19b7deb25a1d"
 };
 
-console.log('🔥 [CONFIG] Firebase config loaded:', {
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain,
-});
+console.log('🔥 [CONFIG] Starting Firebase initialization');
 
-// Initialize Firebase - this will throw if config is invalid
-const app = initializeApp(firebaseConfig);
-console.log('✅ [CONFIG] Firebase app initialized');
+let app = null;
+let auth = null;
+let db = null;
+let storage = null;
 
-// Initialize Firebase Authentication
-const auth = getAuth(app);
-console.log('✅ [CONFIG] Firebase Auth initialized:', !!auth);
+try {
+  // Initialize Firebase
+  app = initializeApp(firebaseConfig);
+  console.log('✅ [CONFIG] Firebase app initialized');
+  
+  // Get auth reference
+  auth = getAuth(app);
+  console.log('✅ [CONFIG] Auth reference obtained');
+  
+  // Get firestore reference
+  db = getFirestore(app);
+  console.log('✅ [CONFIG] Firestore reference obtained');
+  
+  // Get storage reference
+  storage = getStorage(app);
+  console.log('✅ [CONFIG] Storage reference obtained');
+  
+  console.log('✅ [CONFIG] All Firebase services initialized successfully!');
+  
+} catch (error) {
+  console.error('❌ [CONFIG] Firebase initialization error:', error.message, error.code);
+}
 
-// Initialize Cloud Firestore
-const db = getFirestore(app);
-console.log('✅ [CONFIG] Firestore initialized:', !!db);
+// Export services with validation
+const getAuthService = () => {
+  if (!auth) {
+    console.error('❌ [CONFIG] Auth not initialized!');
+    throw new Error('Firebase Auth not initialized');
+  }
+  return auth;
+};
 
-// Initialize Cloud Storage
-const storage = getStorage(app);
-console.log('✅ [CONFIG] Storage initialized:', !!storage);
+const getDBService = () => {
+  if (!db) {
+    console.error('❌ [CONFIG] Firestore not initialized!');
+    throw new Error('Firebase Firestore not initialized');
+  }
+  return db;
+};
 
-// Verify exports
-console.log('🔥 [CONFIG] Verifying exports - auth:', !!auth, 'db:', !!db, 'storage:', !!storage);
+const getStorageService = () => {
+  if (!storage) {
+    console.error('❌ [CONFIG] Storage not initialized!');
+    throw new Error('Firebase Storage not initialized');
+  }
+  return storage;
+};
 
-export { auth, db, storage };
+export { auth, db, storage, getAuthService, getDBService, getStorageService };
 export default app;

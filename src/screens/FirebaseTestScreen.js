@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { auth, db, storage } from '../firebase/firebaseConfig';
+import { getAuthService, getDBService, getStorageService } from '../firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
 
@@ -24,6 +24,7 @@ const FirebaseTestScreen = () => {
     try {
       // Test Auth
       console.log('Testing Firebase Auth...');
+      const auth = getAuthService();
       onAuthStateChanged(auth, (user) => {
         newStatus.auth = user ? '✅ Connected' : '✅ Ready (No user)';
         messages.push('Auth: Ready');
@@ -33,6 +34,7 @@ const FirebaseTestScreen = () => {
       // Test Firestore
       console.log('Testing Firestore...');
       try {
+        const db = getDBService();
         const testCollection = await getDocs(collection(db, 'test'));
         newStatus.firestore = '✅ Connected';
         messages.push(`Firestore: Connected (${testCollection.size} docs)`);
@@ -43,6 +45,7 @@ const FirebaseTestScreen = () => {
 
       // Test Storage
       console.log('Testing Storage...');
+      const storage = getStorageService();
       if (storage) {
         newStatus.storage = '✅ Connected';
         messages.push('Storage: Connected');
