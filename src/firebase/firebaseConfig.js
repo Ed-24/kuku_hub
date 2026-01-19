@@ -30,6 +30,18 @@ try {
   auth = getAuth(app);
   console.log('✅ [CONFIG] Auth reference obtained');
   
+  // Enable Auth emulator for local development (if not in production)
+  if (window.location.hostname === 'localhost' && !auth.emulatorConfig) {
+    try {
+      console.log('🔥 [CONFIG] Attempting to use Auth in localhost environment...');
+      // Don't use emulator by default - just let it connect to production Firebase
+      // connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+      // console.log('✅ [CONFIG] Using Auth Emulator for local testing');
+    } catch (error) {
+      console.warn('⚠️ [CONFIG] Auth emulator not available:', error.message);
+    }
+  }
+  
   // Get firestore reference
   db = getFirestore(app);
   console.log('✅ [CONFIG] Firestore reference obtained');

@@ -106,13 +106,21 @@ export const signIn = async (email, password) => {
     
     const auth = getAuthService();
     console.log('✅ [AUTH] Auth service obtained, attempting login...');
+    console.log('🔥 [AUTH] Auth config:', {
+      currentUser: auth.currentUser,
+      languageCode: auth.languageCode,
+      tenantId: auth.tenantId,
+    });
     
+    console.log('🔥 [AUTH] About to call signInWithEmailAndPassword...');
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     console.log('✅ [AUTH] Sign in successful:', userCredential.user.uid);
     
     return { success: true, user: userCredential.user };
   } catch (error) {
     console.error('❌ [AUTH] Sign in error:', error.code, error.message);
+    console.error('❌ [AUTH] Full error object:', JSON.stringify(error, null, 2));
+    console.error('❌ [AUTH] Error stack:', error.stack);
     
     // Handle specific Firebase errors
     let message = error.message;
@@ -121,6 +129,17 @@ export const signIn = async (email, password) => {
       message = 'No account found with this email address';
     } else if (error.code === 'auth/wrong-password') {
       message = 'Incorrect password';
+    } else if (error.code === 'auth/invalid-email') {
+      message = 'Invalid email address';
+    } else if (error.code === 'auth/configuration-not-found') {
+      message = 'Firebase Auth not configured. Please:\n1. Add "localhost" to authorized domains in Firebase Console\n2. Go to: https://console.firebase.google.com/project/young4chick/authentication/settings\n3. Click "Add domain" and type "localhost"';
+    } else if (error.code === 'auth/too-many-requests') {
+      message = 'Too many login attempts. Please try again later.';
+    }
+    
+    return { success: false, error: message };
+  }
+};
     } else if (error.code === 'auth/invalid-email') {
       message = 'Invalid email address';
     } else if (error.code === 'auth/user-disabled') {
