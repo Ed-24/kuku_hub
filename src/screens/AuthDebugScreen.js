@@ -9,9 +9,9 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
-import { COLORS, SIZES } from '../../constants/theme';
-import { signUp, signIn } from '../../firebase/authService';
-import { useApp } from '../../context/AppContext';
+import { COLORS, SIZES } from '../constants/theme';
+import { signUp, signIn } from '../firebase/authService';
+import { useApp } from '../context/AppContext';
 
 const AuthDebugScreen = ({ navigation }) => {
   const { user } = useApp();
