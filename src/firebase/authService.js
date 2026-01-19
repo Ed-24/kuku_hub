@@ -67,6 +67,12 @@ export const signIn = async (email, password) => {
   try {
     console.log('🔥 [AUTH] Starting sign in:', { email });
     
+    // Validate auth is initialized
+    if (!auth) {
+      throw new Error('Firebase Auth not initialized. Check console for initialization errors.');
+    }
+    
+    console.log('🔥 [AUTH] Auth object available, attempting login...');
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     console.log('✅ [AUTH] Sign in successful:', userCredential.user.uid);
     
@@ -87,6 +93,8 @@ export const signIn = async (email, password) => {
       message = 'This account has been disabled';
     } else if (error.code === 'auth/too-many-requests') {
       message = 'Too many login attempts. Please try again later';
+    } else if (error.code === 'auth/configuration-not-found') {
+      message = 'Firebase Auth not configured. Please check project settings.';
     }
     
     return { success: false, error: message };

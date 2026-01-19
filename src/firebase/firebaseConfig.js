@@ -15,15 +15,45 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+console.log('🔥 [CONFIG] Initializing Firebase with config:', {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+});
+
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+  console.log('✅ [CONFIG] Firebase app initialized successfully');
+} catch (error) {
+  console.error('❌ [CONFIG] Firebase initialization failed:', error);
+}
 
 // Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
+let auth;
+try {
+  auth = getAuth(app);
+  console.log('✅ [CONFIG] Firebase Auth initialized');
+} catch (error) {
+  console.error('❌ [CONFIG] Auth initialization failed:', error);
+}
 
 // Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app);
+let db;
+try {
+  db = getFirestore(app);
+  console.log('✅ [CONFIG] Firestore initialized');
+} catch (error) {
+  console.error('❌ [CONFIG] Firestore initialization failed:', error);
+}
 
 // Initialize Cloud Storage and get a reference to the service
-export const storage = getStorage(app);
+let storage;
+try {
+  storage = getStorage(app);
+  console.log('✅ [CONFIG] Storage initialized');
+} catch (error) {
+  console.error('❌ [CONFIG] Storage initialization failed:', error);
+}
 
+export { auth, db, storage };
 export default app;
