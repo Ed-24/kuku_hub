@@ -20,9 +20,9 @@ const WelcomeScreen = ({ navigation }) => {
   const handleTestConnection = async () => {
     setIsTesting(true);
     try {
-      console.log('🔥 [WELCOME] Running Firebase connectivity test...');
+      console.log('[WELCOME] Running Firebase connectivity test...');
       const result = await testFirebaseConnection();
-      console.log('✅ [WELCOME] Test result:', result);
+      console.log('[WELCOME] Test result:', result);
       
       let message = result.message + '\n\n';
       message += result.fullReport.join('\n');

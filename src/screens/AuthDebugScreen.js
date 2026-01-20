@@ -15,8 +15,8 @@ import { useApp } from '../context/AppContext';
 
 const AuthDebugScreen = ({ navigation }) => {
   const { user } = useApp();
-  const [testEmail, setTestEmail] = useState('');
-  const [testPassword, setTestPassword] = useState('');
+  const [testEmail, setTestEmail] = useState('supplier.test@kukuhub.com');
+  const [testPassword, setTestPassword] = useState('TestPassword123!');
   const [isLoading, setIsLoading] = useState(false);
   const [debugLog, setDebugLog] = useState([]);
 
@@ -45,6 +45,42 @@ const AuthDebugScreen = ({ navigation }) => {
     }
     setIsLoading(false);
   };
+
+  const createTestSupplierAccount = async () => {
+    setIsLoading(true);
+    log('Creating test supplier account...');
+
+    const result = await signUp('supplier.test@kukuhub.com', 'TestPassword123!', 'Test Supplier', 'supplier');
+    
+    if (result.success) {
+      log('✅ Supplier account created!');
+      setTestEmail('supplier.test@kukuhub.com');
+      setTestPassword('TestPassword123!');
+      Alert.alert('Success', 'Supplier test account ready!');
+    } else {
+      log(`❌ Supplier account creation failed: ${result.error}`);
+      Alert.alert('Failed', result.error);
+    }
+    setIsLoading(false);
+  };
+
+  const createTestBuyerAccount = async () => {
+    setIsLoading(true);
+    log('Creating test buyer account...');
+
+    const result = await signUp('buyer.test@kukuhub.com', 'TestPassword123!', 'Test Buyer', 'buyer');
+    
+    if (result.success) {
+      log('✅ Buyer account created!');
+      setTestEmail('buyer.test@kukuhub.com');
+      setTestPassword('TestPassword123!');
+      Alert.alert('Success', 'Buyer test account ready!');
+    } else {
+      log(`❌ Buyer account creation failed: ${result.error}`);
+      Alert.alert('Failed', result.error);
+    }
+    setIsLoading(false);
+  }
 
   const testSignIn = async () => {
     if (!testEmail || !testPassword) {
@@ -135,6 +171,34 @@ const AuthDebugScreen = ({ navigation }) => {
           onPress={populateTestCredentials}
         >
           <Text style={styles.linkText}>📋 Use Demo Credentials</Text>
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.setupTitle}>⚙️ Setup Test Accounts:</Text>
+        
+        <TouchableOpacity
+          style={[styles.button, styles.setupButton]}
+          onPress={createTestSupplierAccount}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color={COLORS.white} />
+          ) : (
+            <Text style={styles.buttonText}>Create Supplier Account</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.setupButton]}
+          onPress={createTestBuyerAccount}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color={COLORS.white} />
+          ) : (
+            <Text style={styles.buttonText}>Create Buyer Account</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -266,6 +330,22 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: '600',
     fontSize: 14,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: 16,
+  },
+  setupTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.darkGray,
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  setupButton: {
+    marginTop: 10,
+    backgroundColor: '#17a2b8',
   },
   logContainer: {
     backgroundColor: '#1e1e1e',

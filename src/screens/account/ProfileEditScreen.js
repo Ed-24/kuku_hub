@@ -14,10 +14,10 @@ import { COLORS, SIZES } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
 
 const ProfileEditScreen = ({ navigation }) => {
-  const { user, userType } = useApp();
+  const { user, userProfile, userType } = useApp();
 
-  const [fullName, setFullName] = useState(user?.name || 'John Doe');
-  const [email, setEmail] = useState(user?.email || 'johndoe@email.com');
+  const [fullName, setFullName] = useState(userProfile?.displayName || user?.displayName || 'User');
+  const [email, setEmail] = useState(user?.email || 'example@email.com');
   const [phone, setPhone] = useState('+256 700 123 456');
   const [location, setLocation] = useState('Kampala, Uganda');
   const [bio, setBio] = useState('Passionate about poultry farming and sustainable agriculture.');
@@ -121,12 +121,12 @@ const ProfileEditScreen = ({ navigation }) => {
             <Text style={styles.inputLabel}>Account Type</Text>
             <View style={styles.accountTypeBadge}>
               <Ionicons
-                name={userType === 'farmer' ? 'leaf' : 'cart'}
-                size={20}
+                name={userType === 'supplier' ? 'leaf' : 'cart'}
+                size={24}
                 color={COLORS.primary}
               />
-              <Text style={styles.accountTypeText}>
-                {userType === 'farmer' ? 'Farmer Account' : 'Buyer Account'}
+              <Text style={styles.userTypeLabel}>
+                {userType === 'supplier' ? 'Supplier Account' : 'Buyer Account'}
               </Text>
             </View>
             <Text style={styles.accountTypeHint}>

@@ -58,7 +58,7 @@ const CheckoutScreen = ({ navigation }) => {
           {cart.map((item) => (
             <View key={item.id} style={styles.orderItem}>
               <View style={styles.itemImageContainer}>
-                <Text style={styles.itemEmoji}>{item.image || '🐔'}</Text>
+                <Text style={styles.itemEmoji}>{item.image || ''}</Text>
               </View>
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.name}</Text>

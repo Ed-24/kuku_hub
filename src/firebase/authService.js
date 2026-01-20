@@ -10,32 +10,32 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { getAuthService, getDBService } from './firebaseConfig';
 
-console.log('✅ [AUTH] authService.js module loaded');
+console.log('[AUTH] authService.js module loaded');
 
 // Sign Up with Email & Password
 export const signUp = async (email, password, displayName, userType) => {
   let newUser = null;
   try {
-    console.log('🔥 [AUTH] Starting sign up:', { email, displayName, userType });
+    console.log('[AUTH] Starting sign up:', { email, displayName, userType });
     
     const auth = getAuthService();
     const db = getDBService();
     
-    console.log('✅ [AUTH] Services obtained, creating user...');
+    console.log('[AUTH] Services obtained, creating user...');
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     newUser = userCredential.user;
-    console.log('✅ [AUTH] User created with UID:', newUser.uid);
+    console.log('[AUTH] User created with UID:', newUser.uid);
 
     // Update profile with display name
     await updateProfile(newUser, { displayName });
-    console.log('✅ [AUTH] Firebase profile updated with displayName:', displayName);
+    console.log('[AUTH] Firebase profile updated with displayName:', displayName);
 
     // Create user document in Firestore
     const userDocData = {
       uid: newUser.uid,
       email: newUser.email,
       displayName: displayName,
-      userType: userType, // 'buyer' or 'farmer'
+      userType: userType, // 'buyer' or 'supplier' - CRITICAL FIELD
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       profile: {
@@ -49,35 +49,37 @@ export const signUp = async (email, password, displayName, userType) => {
       isVerified: false,
     };
     
-    console.log('🔥 [AUTH] About to save user document to Firestore at path: users/' + newUser.uid);
-    console.log('🔥 [AUTH] Document data:', JSON.stringify(userDocData, null, 2));
+    console.log('[AUTH] About to save user document to Firestore at path: users/' + newUser.uid);
+    console.log('[AUTH] Document data:', JSON.stringify(userDocData, null, 2));
+    console.log('[AUTH] IMPORTANT - userType being saved is:', userType);
     
     try {
       await setDoc(doc(db, 'users', newUser.uid), userDocData);
-      console.log('✅ [AUTH] Firestore user document created successfully');
+      console.log('[AUTH] Firestore user document created successfully');
     } catch (firestoreError) {
-      console.error('❌ [AUTH] Firestore setDoc failed:', firestoreError.code, firestoreError.message);
-      console.error('❌ [AUTH] Full Firestore error:', firestoreError);
+      console.error('[AUTH] Firestore setDoc failed:', firestoreError.code, firestoreError.message);
+      console.error('[AUTH] Full Firestore error:', firestoreError);
       throw firestoreError;
     }
 
     // Verify document was created
-    console.log('🔥 [AUTH] Verifying document was saved...');
+    console.log('[AUTH] Verifying document was saved...');
     try {
       const verifyDoc = await getDoc(doc(db, 'users', newUser.uid));
       if (verifyDoc.exists()) {
-        console.log('✅ [AUTH] Verification successful - document exists:', verifyDoc.data());
+        console.log('[AUTH] Verification successful - document exists:', verifyDoc.data());
+        console.log('[AUTH] IMPORTANT - userType in saved document is:', verifyDoc.data().userType);
       } else {
-        console.error('❌ [AUTH] Verification failed - document does not exist after setDoc!');
+        console.error('[AUTH] Verification failed - document does not exist after setDoc!');
       }
     } catch (verifyError) {
-      console.error('❌ [AUTH] Verification read failed:', verifyError.message);
+      console.error('[AUTH] Verification read failed:', verifyError.message);
     }
 
     return { success: true, user: newUser, userProfile: userDocData };
   } catch (error) {
-    console.error('❌ [AUTH] Sign up error:', error.code, error.message);
-    console.error('❌ [AUTH] Full error:', error);
+    console.error('[AUTH] Sign up error:', error.code, error.message);
+    console.error('[AUTH] Full error:', error);
     console.error('❌ [AUTH] Error stack:', error.stack);
     
     // Handle specific Firebase errors
@@ -102,11 +104,11 @@ export const signUp = async (email, password, displayName, userType) => {
 // Sign In with Email & Password
 export const signIn = async (email, password) => {
   try {
-    console.log('🔥 [AUTH] Starting sign in:', { email });
+    console.log('[AUTH] Starting sign in:', { email });
     
     const auth = getAuthService();
-    console.log('✅ [AUTH] Auth service obtained, attempting login...');
-    console.log('🔥 [AUTH] Auth config:', {
+    console.log('[AUTH] Auth service obtained, attempting login...');
+    console.log('[AUTH] Auth config:', {
       currentUser: auth.currentUser,
       languageCode: auth.languageCode,
       tenantId: auth.tenantId,
@@ -205,8 +207,10 @@ export const getUserProfile = async (uid) => {
     const db = getDBService();
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
-      console.log('✅ [AUTH] User profile found:', userDoc.data());
-      return { success: true, data: userDoc.data() };
+      const profileData = userDoc.data();
+      console.log('✅ [AUTH] User profile found:', profileData);
+      console.log('✅ [AUTH] IMPORTANT - userType in fetched profile is:', profileData.userType);
+      return { success: true, data: profileData };
     } else {
       console.warn('⚠️ [AUTH] User profile not found in Firestore for UID:', uid);
       return { success: false, error: 'User profile not found' };

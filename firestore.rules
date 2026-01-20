@@ -9,15 +9,15 @@ service cloud.firestore {
     // Allow anyone to read products
     match /products/{document=**} {
       allow read: if true;
-      // Only farmers can create/update their own products
+      // Only suppliers can create/update their own products
       allow create, write: if request.auth.uid != null;
     }
 
     // Allow authenticated users to read all orders, but only access their own
     match /orders/{orderId} {
-      allow read: if request.auth.uid == resource.data.buyerId || request.auth.uid == resource.data.farmerId;
+      allow read: if request.auth.uid == resource.data.buyerId || request.auth.uid == resource.data.supplierId;
       allow create: if request.auth.uid == request.resource.data.buyerId;
-      allow update: if request.auth.uid == resource.data.farmerId || request.auth.uid == resource.data.buyerId;
+      allow update: if request.auth.uid == resource.data.supplierId || request.auth.uid == resource.data.buyerId;
     }
 
     // Allow users to access their own cart

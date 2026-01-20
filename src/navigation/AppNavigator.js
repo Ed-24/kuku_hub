@@ -16,7 +16,7 @@ import SignUpScreen from '../screens/auth/SignUpScreen';
 
 // Dashboard Screens
 import BuyerDashboard from '../screens/dashboard/BuyerDashboard';
-import FarmerDashboard from '../screens/dashboard/FarmerDashboard';
+import SupplierDashboard from '../screens/dashboard/SupplierDashboard';
 
 // Order Screens
 import OrderChicksScreen from '../screens/order/OrderChicksScreen';
@@ -43,10 +43,10 @@ import ChangePasswordScreen from '../screens/account/ChangePasswordScreen';
 import ServicesScreen from '../screens/services/ServicesScreen';
 import WalletScreen from '../screens/wallet/WalletScreen';
 
-// Farmer Screens
-import InventoryScreen from '../screens/farmer/InventoryScreen';
-import EarningsScreen from '../screens/farmer/EarningsScreen';
-import AnalyticsScreen from '../screens/farmer/AnalyticsScreen';
+// Supplier Screens
+import InventoryScreen from '../screens/supplier/InventoryScreen';
+import EarningsScreen from '../screens/supplier/EarningsScreen';
+import AnalyticsScreen from '../screens/supplier/AnalyticsScreen';
 
 // Messages Screen
 import MessagesScreen from '../screens/messages/MessagesScreen';
@@ -73,7 +73,11 @@ const LoadingScreen = () => (
 
 const DashboardWrapper = () => {
   const { userType } = useApp();
-  return userType === 'farmer' ? <FarmerDashboard /> : <BuyerDashboard />;
+  console.log('[NAVIGATOR] DashboardWrapper - checking userType:', userType);
+  console.log('[NAVIGATOR] IMPORTANT - userType === "supplier"?', userType === 'supplier');
+  const dashboard = userType === 'supplier' ? <SupplierDashboard /> : <BuyerDashboard />;
+  console.log('[NAVIGATOR] Rendering dashboard:', userType === 'supplier' ? 'SupplierDashboard' : 'BuyerDashboard');
+  return dashboard;
 };
 
 const TabNavigator = () => {
@@ -245,7 +249,7 @@ const AppNavigator = () => {
             <Stack.Screen name="Services" component={ServicesScreen} />
             <Stack.Screen name="Wallet" component={WalletScreen} />
 
-            {/* Farmer Screens */}
+            {/* Supplier Screens */}
             <Stack.Screen name="Inventory" component={InventoryScreen} />
             <Stack.Screen name="Earnings" component={EarningsScreen} />
             <Stack.Screen name="Analytics" component={AnalyticsScreen} />

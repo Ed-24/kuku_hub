@@ -78,17 +78,17 @@ const SignInScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={[
                   styles.userTypeButton,
-                  userType === 'farmer' && styles.userTypeButtonActive,
+                  userType === 'supplier' && styles.userTypeButtonActive,
                 ]}
-                onPress={() => setUserType('farmer')}
+                onPress={() => setUserType('supplier')}
               >
                 <Text
                   style={[
                     styles.userTypeText,
-                    userType === 'farmer' && styles.userTypeTextActive,
+                    userType === 'supplier' && styles.userTypeTextActive,
                   ]}
                 >
-                  Farmer
+                  Supplier
                 </Text>
               </TouchableOpacity>
             </View>

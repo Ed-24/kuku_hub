@@ -17,7 +17,7 @@ import { useApp } from '../../context/AppContext';
 
 const AccountScreen = () => {
   const navigation = useNavigation();
-  const { user, userType, logout } = useApp();
+  const { user, userProfile, userType, logout } = useApp();
 
   const navigateTo = (screen) => {
     const parent = navigation.getParent();
@@ -127,15 +127,15 @@ const AccountScreen = () => {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Text style={styles.avatarText}>
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
+              {(userProfile?.displayName || user?.displayName || 'U')?.charAt(0).toUpperCase()}
             </Text>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{user?.name || 'User'}</Text>
+            <Text style={styles.profileName}>{userProfile?.displayName || user?.displayName || 'User'}</Text>
             <Text style={styles.profileEmail}>{user?.email || 'user@email.com'}</Text>
             <View style={styles.userTypeBadge}>
               <Text style={styles.userTypeText}>
-                {userType === 'farmer' ? 'Farmer' : 'Buyer'}
+                {userType === 'supplier' ? 'Supplier' : 'Buyer'}
               </Text>
             </View>
           </View>

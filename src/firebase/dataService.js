@@ -17,12 +17,12 @@ import { getDBService } from './firebaseConfig';
 const getDb = () => getDBService();
 
 // ============ PRODUCTS ============
-export const addProduct = async (farmerId, productData) => {
+export const addProduct = async (supplierId, productData) => {
   try {
     const productRef = doc(collection(getDb(), 'products'));
     await setDoc(productRef, {
       ...productData,
-      farmerId,
+      supplierId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -46,11 +46,11 @@ export const getProducts = async () => {
   }
 };
 
-export const getProductsByFarmer = async (farmerId) => {
+export const getProductsBySupplier = async (supplierId) => {
   try {
     const q = query(
       collection(getDb(), 'products'),
-      where('farmerId', '==', farmerId),
+      where('supplierId', '==', supplierId),
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
@@ -133,11 +133,11 @@ export const getOrdersByBuyer = async (buyerId) => {
   }
 };
 
-export const getOrdersByFarmer = async (farmerId) => {
+export const getOrdersBySupplier = async (supplierId) => {
   try {
     const q = query(
       collection(getDb(), 'orders'),
-      where('farmerId', '==', farmerId),
+      where('supplierId', '==', supplierId),
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);

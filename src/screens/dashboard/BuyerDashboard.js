@@ -15,8 +15,10 @@ import { useApp } from '../../context/AppContext';
 
 const BuyerDashboard = () => {
   const navigation = useNavigation();
-  const { user } = useApp();
-  const userName = user?.name || 'Edith';
+  const { user, userProfile } = useApp();
+  
+  // Get display name from userProfile or user's displayName
+  const userName = userProfile?.displayName || user?.displayName || 'Guest';
 
   const navigateTo = (screen) => {
     const parent = navigation.getParent();

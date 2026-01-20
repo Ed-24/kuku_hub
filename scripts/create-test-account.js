@@ -38,7 +38,7 @@ const auth = admin.auth();
 
 async function createTestAccounts() {
   try {
-    console.log('🔥 Creating test accounts...\n');
+    console.log('Creating test accounts...\n');
 
     // Test Buyer Account
     const buyerEmail = 'buyer.test@kukuhub.com';
@@ -69,13 +69,13 @@ async function createTestAccounts() {
         isVerified: true
       });
 
-      console.log('✅ Buyer account created:');
+      console.log('Buyer account created:');
       console.log(`   Email: ${buyerEmail}`);
       console.log(`   Password: ${buyerPassword}`);
       console.log(`   Role: Buyer\n`);
     } catch (error) {
       if (error.code === 'auth/email-already-exists') {
-        console.log('✅ Buyer account already exists:');
+        console.log('Buyer account already exists:');
         console.log(`   Email: ${buyerEmail}`);
         console.log(`   Password: ${buyerPassword}`);
         console.log(`   Role: Buyer\n`);
@@ -84,22 +84,22 @@ async function createTestAccounts() {
       }
     }
 
-    // Test Farmer Account
-    const farmerEmail = 'farmer.test@kukuhub.com';
-    const farmerPassword = 'TestPassword123!';
+    // Test Supplier Account
+    const supplierEmail = 'supplier.test@kukuhub.com';
+    const supplierPassword = 'TestPassword123!';
 
     try {
-      const farmerUser = await auth.createUser({
-        email: farmerEmail,
-        password: farmerPassword,
-        displayName: 'Test Farmer'
+      const supplierUser = await auth.createUser({
+        email: supplierEmail,
+        password: supplierPassword,
+        displayName: 'Test Supplier'
       });
 
-      await db.collection('users').doc(farmerUser.uid).set({
-        uid: farmerUser.uid,
-        email: farmerEmail,
-        displayName: 'Test Farmer',
-        userType: 'farmer',
+      await db.collection('users').doc(supplierUser.uid).set({
+        uid: supplierUser.uid,
+        email: supplierEmail,
+        displayName: 'Test Supplier',
+        userType: 'supplier',
         createdAt: new Date(),
         updatedAt: new Date(),
         profile: {
@@ -108,21 +108,21 @@ async function createTestAccounts() {
           city: 'Jinja',
           country: 'Uganda',
           profileImage: '',
-          bio: 'Test farmer account'
+          bio: 'Test supplier account'
         },
         isVerified: true
       });
 
-      console.log('✅ Farmer account created:');
-      console.log(`   Email: ${farmerEmail}`);
-      console.log(`   Password: ${farmerPassword}`);
-      console.log(`   Role: Farmer\n`);
+      console.log('Supplier account created:');
+      console.log(`   Email: ${supplierEmail}`);
+      console.log(`   Password: ${supplierPassword}`);
+      console.log(`   Role: Supplier\n`);
     } catch (error) {
       if (error.code === 'auth/email-already-exists') {
-        console.log('✅ Farmer account already exists:');
-        console.log(`   Email: ${farmerEmail}`);
-        console.log(`   Password: ${farmerPassword}`);
-        console.log(`   Role: Farmer\n`);
+        console.log('Supplier account already exists:');
+        console.log(`   Email: ${supplierEmail}`);
+        console.log(`   Password: ${supplierPassword}`);
+        console.log(`   Role: Supplier\n`);
       } else {
         throw error;
       }
@@ -131,7 +131,7 @@ async function createTestAccounts() {
     console.log('🎉 Test accounts ready! Use the credentials above to sign in.\n');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error creating test accounts:', error.message);
+    console.error('Error creating test accounts:', error.message);
     process.exit(1);
   }
 }

@@ -13,12 +13,12 @@ import { useNavigation } from '@react-navigation/native';
 import { COLORS, SIZES, SHADOWS } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
 
-const FarmerDashboard = () => {
+const SupplierDashboard = () => {
   const navigation = useNavigation();
   const { user, userProfile } = useApp();
   
   // Get display name from userProfile or user's displayName
-  const userName = userProfile?.displayName || user?.displayName || 'Farmer';
+  const userName = userProfile?.displayName || user?.displayName || 'Supplier';
 
   const navigateTo = (screen) => {
     const parent = navigation.getParent();
@@ -74,7 +74,7 @@ const FarmerDashboard = () => {
           <View>
             <Text style={styles.greeting}>Hello {userName},</Text>
             <Text style={styles.welcomeBack}>Welcome back!</Text>
-            <Text style={styles.userType}>Farmer Account</Text>
+            <Text style={styles.userType}>Supplier Account</Text>
           </View>
           <TouchableOpacity
             style={styles.notificationButton}
@@ -371,4 +371,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FarmerDashboard;
+export default SupplierDashboard;

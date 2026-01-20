@@ -9,7 +9,7 @@ export const useApp = () => useContext(AppContext);
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [userType, setUserType] = useState('buyer'); // 'buyer' or 'farmer'
+  const [userType, setUserType] = useState('buyer'); // 'buyer' or 'supplier'
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -17,23 +17,26 @@ export const AppProvider = ({ children }) => {
 
   // Listen to Firebase Auth State
   useEffect(() => {
-    console.log('🔥 [CONTEXT] Setting up auth listener');
+    console.log('[CONTEXT] Setting up auth listener');
     const unsubscribe = onAuthStateChangedListener(async (firebaseUser) => {
-      console.log('🔥 [CONTEXT] Auth state changed:', firebaseUser?.uid || 'No user');
+      console.log('[CONTEXT] Auth state changed:', firebaseUser?.uid || 'No user');
       
       if (firebaseUser) {
         setUser(firebaseUser);
-        console.log('🔥 [CONTEXT] User set, attempting to fetch profile');
+        console.log('[CONTEXT] User set, attempting to fetch profile');
         
         // Get user profile from Firestore
         try {
           const profileResult = await getUserProfile(firebaseUser.uid);
-          console.log('🔥 [CONTEXT] Profile fetch result:', profileResult.success, profileResult.error);
+          console.log('[CONTEXT] Profile fetch result:', profileResult.success, profileResult.error);
           
           if (profileResult.success && profileResult.data) {
-            console.log('✅ [CONTEXT] Profile found and set:', profileResult.data.displayName);
+            console.log('[CONTEXT] Profile found and set:', profileResult.data.displayName);
+            console.log('[CONTEXT] IMPORTANT - Profile data userType is:', profileResult.data.userType);
             setUserProfile(profileResult.data);
-            setUserType(profileResult.data.userType || 'buyer');
+            const finalUserType = profileResult.data.userType || 'buyer';
+            console.log('[CONTEXT] IMPORTANT - Setting userType to:', finalUserType);
+            setUserType(finalUserType);
 
             // Load cart for buyers
             if (profileResult.data.userType === 'buyer') {
@@ -41,10 +44,10 @@ export const AppProvider = ({ children }) => {
                 const cartResult = await getCart(firebaseUser.uid);
                 if (cartResult.success && cartResult.data.items) {
                   setCart(cartResult.data.items);
-                  console.log('✅ [CONTEXT] Cart loaded with', cartResult.data.items.length, 'items');
+                  console.log('[CONTEXT] Cart loaded with', cartResult.data.items.length, 'items');
                 }
               } catch (cartError) {
-                console.error('❌ [CONTEXT] Cart load error:', cartError);
+                console.error('[CONTEXT] Cart load error:', cartError);
               }
             }
 
@@ -53,10 +56,10 @@ export const AppProvider = ({ children }) => {
               const ordersResult = await getOrdersByBuyer(firebaseUser.uid);
               if (ordersResult.success) {
                 setOrders(ordersResult.data);
-                console.log('✅ [CONTEXT] Orders loaded:', ordersResult.data.length);
+                console.log('[CONTEXT] Orders loaded:', ordersResult.data.length);
               }
             } catch (ordersError) {
-              console.error('❌ [CONTEXT] Orders load error:', ordersError);
+              console.error('[CONTEXT] Orders load error:', ordersError);
             }
           } else {
             console.warn('⚠️ [CONTEXT] Profile not found, user may be new or profile not saved');
@@ -64,10 +67,10 @@ export const AppProvider = ({ children }) => {
             setUserType('buyer');
           }
         } catch (error) {
-          console.error('❌ [CONTEXT] Error in auth state handler:', error);
+          console.error('[CONTEXT] Error in auth state handler:', error);
         }
       } else {
-        console.log('🔥 [CONTEXT] User logged out');
+        console.log('[CONTEXT] User logged out');
         setUser(null);
         setUserProfile(null);
         setUserType('buyer');
